@@ -5,22 +5,27 @@
   <link rel="stylesheet" href="edittask.css">
 </head>
 <body>
-
+<div class="onoffbutton">
+<label class="switch">
+  <input type="checkbox" id="toggleButton">
+  <span class="slider round"></span>
+</label>
+</div>
   <div class="white-frame">
-      <div class="previous-page" id="previous-page">
-        <img src="../Product_Backlog/previouspage.png" width=30px height = 30px>
+    <div class="previous-page" id="previous-page">
+      <img src="../Product_Backlog/previouspage.png" width=30px height = 30px>
+    </div>
+    <div class="menu-bar">
+      <button id="menu-button"><img src="../Product_Backlog/menubar.png" width=30px height=20px></button>
+      <div class="menu-items" id="menu-items">
+        <a id="prodBacklog" style="cursor: pointer;">Product backlog</a>
+        <a id="scrumboard" style="cursor: pointer;">Scrumboard</a>
+        <a id="teamManagement" style="cursor: pointer;">Team management</a>
+        <a id="profile" style="cursor: pointer;">Profile</a>
+        <a id="resetpassword" style="cursor: pointer;">Reset password</a>
+        <a id="LogOutButton" style="cursor: pointer;">Log out</a>
       </div>
-      <div class="menu-bar">
-        <button id="menu-button"><img src="../Product_Backlog/menubar.png" width=30px height=20px></button>
-        <div class="menu-items" id="menu-items">
-          <a href="../Product_Backlog/prodBacklog.html">Product backlog</a>
-          <a href="../Sprint_Backlog/scrumboard.html">Scrumboard</a>
-          <a href="../Team_management/contributionchart.html">Team management</a>
-          <a href="../Team_management/profilepage.html">Profile</a>
-          <a href="../Team_management/resetpassword.html">Reset password</a>
-          <a href="#">Log out</a>
-        </div>
-      </div>
+    </div>
 
     <div class="task-frame flex col">
       <div class="task-name" id="task-name">Task name</div>
@@ -29,11 +34,7 @@
           <div class="assignee">
             <span class="text">Assignee: </span>
             <select name="team-member" id="AssigneeList">
-              <option value="Alice">Alice</option>
-              <option value="Bob">Bob</option>
-              <option value="Larry">Larry</option>
-              <option value="Zam">Zam</option>
-              </select>
+            </select>
           </div>
           <div class="priority">
             <span class="text">Priority: </span>
@@ -42,7 +43,7 @@
                 <option value="Medium" style="color: yellow;">Medium</option>
                 <option value="Important" style="color: orange;">Important</option>
                 <option value="Urgent" style="color: red;">Urgent</option>
-              </select>
+            </select>
           </div>
           <div class="stage-of-task">
             <span class="text">Stage of task: </span>
@@ -51,7 +52,7 @@
                 <option value="Development">Development</option>
                 <option value="Testing">Testing</option>
                 <option value="Integration">Integration</option>
-              </select>
+            </select>
           </div>
         </div>
         <div class="flex col">
@@ -78,24 +79,22 @@
             <label for="Bug"> Bug </label>
           </div>
         </div>
-          <div class="tags-container">
-            <div class="tags tags1" id="FE"></div>
-            <div class="tags tags2" id="BE"></div>
-            <div class="tags tags3" id="API"></div>
-            <div class="tags tags4" id="DB"></div>
-            <div class="tags tags5" id="FW"></div>
-            <div class="tags tags6" id="TEST"></div>
-            <div class="tags tags7" id="UI"></div>
-            <div class="tags tags8" id="UX"></div>
-
-          </div>
+        <div class="tags-container">
+          <div class="tags tags1" id="FE"></div>
+          <div class="tags tags2" id="BE"></div>
+          <div class="tags tags3" id="API"></div>
+          <div class="tags tags4" id="DB"></div>
+          <div class="tags tags5" id="FW"></div>
+          <div class="tags tags6" id="TEST"></div>
+          <div class="tags tags7" id="UI"></div>
+          <div class="tags tags8" id="UX"></div>
+        </div>
       </div>
       <div class="task-description">
         <div class="text">Task description:</div>
         <textarea rows="8" columns="50" class="description text" id="task-description" value="..."></textarea>
       </div>
       <div class="accumulatetime">
-        
         <div class="log-time-spent">
           <div class="text">Log time spent:</div>
         </div>
@@ -142,7 +141,7 @@
 
       </div>
     </div>
-    </div>
+  </div>
 
  
     <br>
@@ -174,7 +173,7 @@
 <script type="module">
 //--------------------------------------------------EDIT-----------------------------------------------------------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import { getDatabase, ref, set, get, child, query, update, push, orderByChild } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+import { getDatabase, ref, set, get, child, query, update, push, orderByChild,remove} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 const firebaseConfig = {
     apiKey: "AIzaSyAk2H_8opCo31ebK1Ce_hZ5G36XNkydR1s",
     authDomain: "project-2782373696466964042.firebaseapp.com",
@@ -228,10 +227,65 @@ const accTime = document.getElementById("accumulation-time");
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const logTimeSpentArray = [];
+const timeSpentAccordingToAssigneeArray = [];
 let tags = ["Frontend","Backend","API","Database","Framework","Testing","UI","UX"]
 
 //----------------------------------------------loading------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", function () {
+    const username = urlParams.get("username")
+    document.getElementById("prodBacklog").addEventListener("click",function(){
+      window.location.href= `../Product_Backlog/prodBacklog.html?username=${username}`})
+    
+    document.getElementById("scrumboard").addEventListener("click",function(){
+      window.location.href= `../Sprint_Backlog/scrumboard.html?username=${username}`})
+    
+    document.getElementById("teamManagement").addEventListener("click",function(){
+      get(ref(db,`addMember/${username}`)).then((user)=>{
+      if (user.val()["identity"] != "admin")
+      {
+        alert("You don't have the access to view the Team_Management")
+      }
+      else
+      {window.location.href= `../Team_management/contributionchart.html?username=${username}`}
+    })})
+    document.getElementById("profile").addEventListener("click",function(){
+      get(ref(db,`addMember/${username}`)).then((user)=>{
+      if (user.val()["identity"] != "admin")
+      {
+        alert("You don't have the access to view the Team_Management")
+      }
+      else
+      {window.location.href= `../Team_management/profilepage.html?username=${username}`}})})
+    document.getElementById("resetpassword").addEventListener("click",function(){
+      window.location.href= `../Team_management/resetpassword.html?username=${username}`})
+    
+      get(ref(db,`addMember/${username}`)).then((user)=>{
+    if (!user.exists()){
+        window.location.href = `../Login/login.html`
+    }
+      else if (user.val()["status"] != "Log in"){
+        window.location.href = `../Login/login.html`
+      }
+    })
+    document.getElementById("LogOutButton").addEventListener("click",function(){
+      update((ref(db,`addMember/${username}`)),{
+        status: "Log out"
+      })
+      window.location.href = `../Login/login.html`
+    })
+  get(ref(db,`addMember`)).then((allMember)=>{
+        if (allMember.exists()) {
+            const allMemberVal = allMember.val()
+            const allMemberName = Object.keys(allMemberVal)
+            console.log(allMemberName)
+            allMemberName.forEach((member)=>{
+                let newOption = document.createElement('option');
+                newOption.value = member
+                newOption.textContent = member
+                taskAssigneeElement.appendChild(newOption)
+            })
+        }
+      })
   const dataRef = ref(db, `newsprint/${sprintId}/selectedTasks/${taskId}`);
   const savedTasks = [];
   const logTimeSpentDataArray = [];
@@ -339,10 +393,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // ------------------------------------------ add time in chart ------------------------------------------------------------------------
 function trialVersionFunction(){
-      const xValues = [];
       const yValues = [];
       const dateSet = new Set(duration);
-
+      logTimeSpentArray.sort((a, b) => new Date(a.date) - new Date(b.date));
       console.log(logTimeSpentDataArray)
       console.log(logTimeSpentArray)
 
@@ -350,26 +403,40 @@ function trialVersionFunction(){
         // Check if the date exists in logTimeSpentDataArray
         const timeData = logTimeSpentDataArray.find(time => time.date === date);
         const timeData2 = logTimeSpentArray.find(time => time.date === date);
-        // console.log('timedata' + timeData)
+
         if (timeData && timeData2){
           yValues.push(timeData2.timeSpent)
         }
         else if (timeData) {
+          console.log(timeData)
           yValues.push(timeData.timeSpent);
-        } else if (timeData2){
+        } else if (timeData2){// find the added value (not saved yet)
           yValues.push(timeData2.timeSpent);
         }
         else{
           yValues.push(0)
         }
       });
-        
+
+      for (let i = 1; i < yValues.length; i++){
+        yValues[i] = parseFloat(yValues[i]) + parseFloat(yValues[i-1])
+      }
+      console.log(yValues)
+      // for(let i=0; i<yValues.length ;i++){
+      //   console.log(yValues[i])
+      //   if(yValues[i] === 0 && i !== 0){
+      //     yValues[i] = yValues[i-1]
+      //   if(yValues[i] < yValues[i-1] && i !== 0){
+      //     yValues[i] = yValues[i] + yValues[i-1]
+      //     console.log(yValues[i])
+      //   }
+      //   }
+      // }
       var data = {
         labels: duration,
         datasets: [{
           label: "Total hour spent",
-          backgroundColor:"rgba(0,0,255,1.0)",
-          borderColor: "rgba(0,0,255,255)",
+          borderColor: "black",
           data: yValues,
           fill: false,
           tension: 0
@@ -380,7 +447,6 @@ function trialVersionFunction(){
 }
 // ------------------------------------------ view chart function------------------------------------------------------------------------
 function viewChartFunction(){
-      const xValues = [];
       const yValues = [];
  
       const dateSet = new Set(duration);
@@ -391,31 +457,24 @@ function viewChartFunction(){
 
         if (timeData) {
           // If found, push the timeSpent value
-          xValues.push(new Date(timeData.date));
           yValues.push(timeData.timeSpent);
         } else {
           // If not found, push 0
-          xValues.push(new Date(date));
           yValues.push(0);
         }
       });
 
-
+      for (let i = 1; i < yValues.length; i++){
+        yValues[i] = parseFloat(yValues[i]) + parseFloat(yValues[i-1])
+      }
+      
       logTimeSpentDataArray.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-      const formattedDates = xValues.map((date) => {
-          const day = date.getDate().toLocaleString('en-GB',{year:"numeric"})
-          const month = (date.getMonth() + 1).toLocaleString('en-GB',{month:"2-digit"})
-          const year = date.getFullYear();
-          return [year,month,day].join("-");
-        }); 
-        
       var data = {
         labels: duration,
         datasets: [{
           label: "Total hour spent",
-          backgroundColor:"rgba(0,0,255,1.0)",
-          borderColor: "rgba(0,0,255,255)",
+          borderColor: "black",
           data: yValues,
           fill: false,
           tension: 0
@@ -453,20 +512,23 @@ function generateChart(data){
     const startTime = document.getElementById("start-time-spent");
     const endTime = document.getElementById("end-time-spent");
     const hour_startTime = startTime.value.split(":")[0]
-    console.log(hour_startTime)
+    // console.log(hour_startTime)
     const minute_startTime = startTime.value.split(":")[1]/60*100
-    console.log(minute_startTime)
+    // console.log(minute_startTime)
     const hour_endTime = endTime.value.split(":")[0];
-    console.log(hour_endTime)
+    // console.log(hour_endTime)
     const minute_endTime = endTime.value.split(":")[1]/60*100;
     const timeSpent1 = parseFloat(`${hour_endTime}.${minute_endTime}`) - parseFloat(`${hour_startTime}.${minute_startTime}`);
     let timeSpent2 = timeSpent1.toFixed(2);
+    let timeSpent4 = timeSpent1.toFixed(2)
     const timeSpent3 = timeSpent1.toFixed(2);
     let flag = false
+    let flag2 = false
 
     if (timeSpent2 >= 0){
       const selectedDate = date1.value;
       const timeSpentRef = ref(db, `newsprint/${sprintId}/selectedTasks/${taskId}/logTimeSpent/${selectedDate}`);
+      const timeSpentRefAccordingToAssignee = ref(db,`newsprint/${sprintId}/taskAssignees/${taskAssigneeElement.value}`)
       if (duration.includes(selectedDate)){
         if (currentDate > new Date(selectedDate)){
           get(timeSpentRef)
@@ -488,12 +550,36 @@ function generateChart(data){
               timeSpent: timeSpent2
           }
           logTimeSpentArray.push(logTimeSpent)
+          console.log(logTimeSpentArray)
             }
           accTime.textContent = parseFloat(accTime.textContent) + parseFloat(timeSpent3);
           }
-        )
+        
+        ).then(() => {
+          get(timeSpentRefAccordingToAssignee).then((assignee)=>{
+          if (assignee.exists()){
+          if (assignee.val()[selectedDate] != null) {
+            let existingTimeSpent = parseFloat(assignee.val()[selectedDate])
+            timeSpent4 = existingTimeSpent + parseFloat(timeSpent4)
+          }}
+          timeSpentAccordingToAssigneeArray.forEach((logTime)=>{
+            if (logTime[selectedDate] != null){
+              logTime[selectedDate] = parseFloat(timeSpent4) + parseFloat(logTime.timeSpent)
+              flag2 = true
+            }
+          })
+          if (flag2 === false){
+              const logTimeSpent = {
+              [selectedDate]: timeSpent4
+          }
+          timeSpentAccordingToAssigneeArray.push(logTimeSpent)
+          console.log(timeSpentAccordingToAssigneeArray)
+        }})
+        })
           .then(() => {trialVersionFunction()})
-        }
+      }
+
+        
         else{
           alert('This day is unavailable now.')
         }
@@ -535,6 +621,7 @@ const check = setInterval(checkTag,10)
 
 //--------------------------------------------------save button-----------------------------------------------------
 savebutton.addEventListener("click",function(){
+
   event.preventDefault();
   let taskTag = [];
         tagOptionList.forEach((tag) => {
@@ -545,15 +632,25 @@ savebutton.addEventListener("click",function(){
 
   tags = tags.filter(tag => taskTag.includes(tag));
   
-  // const abc = ref(db, `newsprint/${sprintId}/selectedTasks/${taskId}/logTimeSpent`)
-  // const newLogTime = push(abc)
-  // logTimeSpentArray.forEach((logTimeSpent)=>{
-  //   console.log(logTimeSpent.date)
-  //   set(newLogTime,logTimeSpent)// Setting reference, store log time spent (date and time) in the ref
-  // })
 
   logTimeSpentArray.forEach((logTimeSpent)=>{
     set(ref(db, `newsprint/${sprintId}/selectedTasks/${taskId}/logTimeSpent/${logTimeSpent.date}`),logTimeSpent)// Setting reference, store log time spent (date and time) in the ref
+  })
+  update(ref(db,`newsprint/${sprintId}/taskAssignees/${taskAssigneeElement.value}`),{
+    name: taskAssigneeElement.value
+  })
+  timeSpentAccordingToAssigneeArray.forEach((logTimeSpent)=>{
+    update(ref(db,`newsprint/${sprintId}/taskAssignees/${taskAssigneeElement.value}/logTimeSpent`),logTimeSpent)
+  })
+
+  logTimeSpentDataArray.forEach((logTimeSpent)=>{
+    get(ref(db, `newsprint/${sprintId}/selectedTasks/${taskId}/logTimeSpent/${logTimeSpent.date}`)).then((task)=>{
+      if(task.val()["timeSpent"] < logTimeSpent.timeSpent){
+        console.log('hi')
+        set(ref(db, `newsprint/${sprintId}/selectedTasks/${taskId}/logTimeSpent/${logTimeSpent.date}`),logTimeSpent)
+      }
+    })// Setting reference, store log time spent (date and time) in the ref
+
   })
 
   const status = document.querySelector('input[name="status"]:checked').value
@@ -626,14 +723,18 @@ savebutton.addEventListener("click",function(){
     })
       }
     })
-    .then(() => { window.location.href = `task.html?sprintId=${sprintId}&taskId=${taskId}`});
+    .then(() => { window.location.href = `task.html?username=${username}&sprintId=${sprintId}&taskId=${taskId}`});
 
   }
 })
 
 //--------------------------------------------------back button-----------------------------------------------------
 previousPage.addEventListener("click",function(){
-  window.location.href = `task.html?sprintId=${sprintId}&taskId=${taskId}`
+  window.location.href = `task.html?username=${username}&sprintId=${sprintId}&taskId=${taskId}`
+})
+deletebutton.addEventListener("click",function(){
+  remove(ref(db,`newsprint/${sprintId}/selectedTasks/${taskId}`))
+  window.location.href = `sprint.html?username=${username}&sprintId=${sprintId}`
 })
 }
 );
@@ -653,6 +754,42 @@ const prioritiesSelect = document.getElementById("priorities");
 
     // Call the changeSelectColor function initially to set the initial color
     changeSelectColor();
+</script>
+
+<script>
+  const toggleButton = document.getElementById("toggleButton");
+  const body = document.body;
+  const colorMappings = {
+  "green": "#85682c",
+  "yellow": "#fdf5eb",
+  "orange": "#e1af3b",
+  "red": "#9b7a26",
+  "rgb(133, 104, 44)": "green",
+  "rgb(253, 245, 235)": "yellow",
+  "rgb(225, 175, 59)": "orange",
+  "rgb(155, 122, 38)": "red"
+  };
+
+  toggleButton.addEventListener("change", function() {
+    if (toggleButton.checked) {
+      body.classList.add("color-blind-friendly");
+      updatePriorityColor();
+    } else {
+      body.classList.remove("color-blind-friendly");
+      updatePriorityColor();
+    }
+  });
+
+  function updatePriorityColor() {
+    const priorities = document.getElementById("priorities");
+    for (let i = 0; i < priorities.options.length; i++) {
+      const option = priorities.options[i];
+      const currentColor = option.style.color;
+      if (colorMappings[currentColor]) {
+        option.style.color = colorMappings[currentColor];
+      }
+    }
+  }
 </script>
 </body>
 </html>

@@ -5,20 +5,25 @@
   <link rel="stylesheet" href="addtask.css">
 </head>
 <body>
-
+<div class="onoffbutton">
+<label class="switch">
+  <input type="checkbox" id="toggleButton">
+  <span class="slider round"></span>
+</label>
+</div>
   <div class="white-frame">
-      <div class="previous-page">
-        <a href = "prodBacklog.html"><img src="previouspage.png" width=30px height = 30px></a>
+      <div class="previous-page" id="previous-page" onclick="goBack()">
+        <a style="cursor: pointer;"><img src="previouspage.png" width=30px height = 30px></a>
       </div>
       <div class="menu-bar">
         <button id="menu-button"><img src="menubar.png" width=30px height=20px></button>
         <div class="menu-items" id="menu-items">
-          <a href="prodBacklog.html">Product backlog</a>
-          <a href="../Sprint_Backlog/scrumboard.html">Scrumboard</a>
-          <a href="../Team_management/contributionchart.html">Team management</a>
-          <a href="../Team_management/profilepage.html">Profile</a>
-          <a href="../Team_management/resetpassword.html">Reset password</a>
-          <a href="#">Log out</a>
+          <a id="prodBacklog" style="cursor: pointer;">Product backlog</a>
+          <a id="scrumboard" style="cursor: pointer;">Scrumboard</a>
+          <a id="teamManagement" style="cursor: pointer;">Team management</a>
+          <a id="profile" style="cursor: pointer;">Profile</a>
+          <a id="resetpassword" style="cursor: pointer;">Reset password</a>
+          <a id="LogOutButton" style="cursor: pointer;">Log out</a>
         </div>
       </div>
 
@@ -33,10 +38,6 @@
             <span class="text">Assignee: </span>
             <select name="team-member" id="AssigneeList">
             <option value="" disabled selected>Select an assignee</option>
-              <option value="Alice">Alice</option>
-              <option value="Bob">Bob</option>
-              <option value="Larry">Larry</option>
-              <option value="Zam">Zam</option>
               </select>
           </div>
           <div class="priority">
@@ -85,14 +86,6 @@
           </div>
         </div>
 
-        <!-- <sideBar id="sideBar" class="flex col">
-          <div class="sort-container">
-            <button class="sort">Sort</button>
-            <button class="sort1" id="Newest-To-Oldest" value="Newest-To-Oldest">Newest to Oldest</button>
-            <button class="sort2" id="Oldest-To-Newest" value="Oldest-To-Newest">Oldest to Newest</button>
-            <button class="sort3" id="Low-To-Urgent" value="Low-To-Urgent">Low to Urgent</button>
-            <button class="sort4" id="Urgent-To-Low" value="Urgent-To-Low">Urgent to Low</button>
-          </div> -->
 
           <div class="tags-container">
             <div class="tags tags1" id="FE"></div>
@@ -118,7 +111,7 @@
  
     <br>
     <div class="button-container">
-        <a href="prodBacklog.html" id="save-button" class="save-button">Save</a>
+        <a style="cursor: pointer;" id="save-button" class="save-button">Save</a>
         <div class="tag-bar" id="tag-bar">
             <div class="tag-menu" id="tag-menu">
                 <label class="tag1" for="FEoption"><input type="checkbox" id="FEoption" name="tag" value="Frontend">Frontend</label>
@@ -132,7 +125,7 @@
             </div>
             <div class="tag-button" id="tag-button">Tag</div>
         </div>
-        <a href="prodBacklog.html" id="delete-button" class="delete-button">Delete</a>
+        <a style="cursor: pointer;" id="delete-button" class="delete-button">Discard</a>
     </div>
     
 
@@ -141,7 +134,13 @@
 <script type = "module">
   // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+import { getDatabase, ref, set, get, child,update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+function goBack(){
+  const previousPageUrl = document.referrer;
+            if (previousPageUrl) {
+                window.location.replace(previousPageUrl);
+            }
+}
 const firebaseConfig = {
     apiKey: "AIzaSyAk2H_8opCo31ebK1Ce_hZ5G36XNkydR1s",
     authDomain: "project-2782373696466964042.firebaseapp.com",
@@ -155,6 +154,49 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const db = getDatabase(app);
+const urlParams = new URLSearchParams(window.location.search)
+    const username = urlParams.get("username")
+    document.getElementById("prodBacklog").addEventListener("click",function(){
+      window.location.href= `../Product_Backlog/prodBacklog.html?username=${username}`})
+    
+    document.getElementById("scrumboard").addEventListener("click",function(){
+      window.location.href= `../Sprint_Backlog/scrumboard.html?username=${username}`})
+    
+    document.getElementById("teamManagement").addEventListener("click",function(){
+      get(ref(db,`addMember/${username}`)).then((user)=>{
+      if (user.val()["identity"] != "admin")
+      {
+        alert("You don't have the access to view the Team_Management")
+      }
+      else
+      {window.location.href= `../Team_management/contributionchart.html?username=${username}`}
+    })})
+    document.getElementById("profile").addEventListener("click",function(){
+      get(ref(db,`addMember/${username}`)).then((user)=>{
+      if (user.val()["identity"] != "admin")
+      {
+        alert("You don't have the access to view the Team_Management")
+      }
+      else
+      {window.location.href= `../Team_management/profilepage.html?username=${username}`}})})
+
+    document.getElementById("resetpassword").addEventListener("click",function(){
+      window.location.href= `../Team_management/resetpassword.html?username=${username}`})
+    
+      get(ref(db,`addMember/${username}`)).then((user)=>{
+    if (!user.exists()){
+        window.location.href = `../Login/login.html`
+    }
+      else if (user.val()["status"] != "Log in"){
+        window.location.href = `../Login/login.html`
+      }
+    })
+    document.getElementById("LogOutButton").addEventListener("click",function(){
+      update((ref(db,`addMember/${username}`)),{
+        status: "Log out"
+      })
+      window.location.href = `../Login/login.html`
+    })
 
 const decrementButton = document.querySelector(".decrement-button");
 const incrementButton = document.querySelector(".increment-button");
@@ -195,7 +237,22 @@ const
   UX = document.getElementById("UX"),
   increment = document.getElementById("increment"),
   decrement = document.getElementById("decrement"),
+  previousPage = document.getElementById("previous-page"),
+  assigneeList = document.getElementById("AssigneeList"),
   tagDisplayList = [FE,BE,API,DB,FW,TEST,UI,UX]
+  get(ref(db,`addMember`)).then((allMember)=>{
+        if (allMember.exists()) {
+            const allMemberVal = allMember.val()
+            const allMemberName = Object.keys(allMemberVal)
+            console.log(allMemberName)
+            allMemberName.forEach((member)=>{
+                let newOption = document.createElement('option');
+                newOption.value = member
+                newOption.textContent = member
+                assigneeList.appendChild(newOption)
+            })
+        }
+      })
 
 function displayTag() {
   tagOptionList.forEach(tag => {
@@ -207,7 +264,9 @@ function displayTag() {
     }
   })}
 const check = setInterval(displayTag,10)
-
+previousPage.addEventListener("click",function(){
+  window.location.href = `prodBacklog.html?username=${username}`
+})
 document.getElementById("save-button").addEventListener('click', function(e){
           
   e.preventDefault();
@@ -276,7 +335,7 @@ document.getElementById("save-button").addEventListener('click', function(e){
         taskTags : taskTags
 
     })
-    .then(() => {window.location.href = "prodBacklog.html"});
+    .then(() => {window.location.href = `prodBacklog.html?username=${username}`});
   }else{
     alert("Please fill out all fields!")
   }
@@ -299,6 +358,41 @@ const prioritiesSelect = document.getElementById("priorities");
 
     // Call the changeSelectColor function initially to set the initial color
     changeSelectColor();
+</script>
+
+<script>
+  const colorMappings = {
+  "green": "#85682c",
+  "yellow": "#fdf5eb",
+  "orange": "#e1af3b",
+  "red": "#9b7a26",
+  "rgb(133, 104, 44)": "green",
+  "rgb(253, 245, 235)": "yellow",
+  "rgb(225, 175, 59)": "orange",
+  "rgb(155, 122, 38)": "red"
+  };
+  const toggleButton = document.getElementById("toggleButton");
+  const body = document.body;
+  toggleButton.addEventListener("change", function() {
+    if (toggleButton.checked) {
+      body.classList.add("color-blind-friendly");
+      updatePriorityColor();
+    } else {
+      body.classList.remove("color-blind-friendly");
+      updatePriorityColor();
+    }
+
+    function updatePriorityColor() {
+    const priorities = document.getElementById("priorities");
+    for (let i = 0; i < priorities.options.length; i++) {
+      const option = priorities.options[i];
+      const currentColor = option.style.color;
+      if (colorMappings[currentColor]) {
+        option.style.color = colorMappings[currentColor];
+      }
+    }
+  }
+  });
 </script>
 </body>
 </html>
