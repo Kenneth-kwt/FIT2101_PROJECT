@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Profile page</title>
+<link rel="stylesheet" href="profilepage.css">
+</head>
+<body>
+<div class="onoffbutton">
+<label class="switch">
+  <input type="checkbox">
+  <span class="slider round"></span>
+</label>
+</div>
+
+<div class="white-frame"> 
+<div class="header-menu-container">
+<div class="previous-page">
+<a href = "../Product_Backlog/prodBacklog.html"><img src="../Product_Backlog/previouspage.png" width=30px height = 30px></a>
+</div>
+<div class="menu-bar">
+<button id="menu-button"><img src="../Product_Backlog/menubar.png" width=30px height=20px></button>
+<div class="menu-items" id="menu-items">
+<a href="../Product_Backlog/prodBacklog.html">Product backlog</a>
+<a href="../Sprint_Backlog/scrumboard.html">Scrumboard</a>
+<a href="contributionchart.html">Team management</a>
+<a href="profilepage.html">Profile</a>
+<a href="../Team_management/resetpassword.html">Reset password</a>
+<a href="#">Log out</a>
+</div>
+</div>
+</div>
+
+<div class="dark-blue-frame">
+    <div class="teammember">
+        Team Member
+    </div>
+    <div class="email">
+        Email
+    </div>
+    <div class="managemembers">
+        Manage members 
+    </div>
+</div>
+
+<div class="member-details">
+    <div class="details-frame">
+        <div class="name-input">
+            Alice
+        </div>
+        <div class="email-input">
+            alice@gmail.com
+        </div>
+        <div class="edit-input">
+                <a href="editmember.html" id="edit-button" class="edit-button">Edit</a>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="details-frame">
+    <div class="name-input">
+        Alice
+    </div>
+    <div class="email-input">
+        alice@gmail.com
+    </div>
+    <div class="edit-input">
+            <a href="../Team_management/editmember.html" id="edit-button" class="edit-button">Edit</a>
+    </div>
+</div> -->
+
+<div class="button-container">
+    <a href="#" id="view-button" class="view-button">View Team Contribution</a>
+    <a href="../Team_management/addmember.html" id="create-button" class="create-button">Create New Account</a>
+    <a href="deletemember.html" id="delete-button" class="delete-button">Delete Existing Account</a>
+    </div>
+
+</div>
+
+
+    
+</div>
+
+<script type="module">
+//---------------------------------------- DISPLAY MEMBER DETAILS----------------------------------------------------
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import { getDatabase, ref, set, get, child, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+const firebaseConfig = {
+    apiKey: "AIzaSyAk2H_8opCo31ebK1Ce_hZ5G36XNkydR1s",
+    authDomain: "project-2782373696466964042.firebaseapp.com",
+    databaseURL: "https://project-2782373696466964042-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "project-2782373696466964042",
+    storageBucket: "project-2782373696466964042.appspot.com",
+    messagingSenderId: "971400388443",
+    appId: "1:971400388443:web:fc495758d4109f4a1f847e"
+};
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const que = query(ref(db, "addMember/"));
+    const memberDetails = document.querySelector('.member-details');
+    const savedMemberDetails = [];
+
+    get(que).then((snapshot) => {
+        if (snapshot.exists()) {
+            snapshot.forEach((childSnapshot) => {
+                const childData = childSnapshot.val();
+                savedMemberDetails.push(childData)
+            });
+    }}
+    )
+    .then(() => {console.log(savedMemberDetails)})
+    .then(() => {displayMemberDetail(savedMemberDetails)})
+    .catch((error) => {
+        console.error("Error getting data:", error);
+    });
+
+    // DISPLAY
+    function displayMemberDetail(memberData) {
+        memberDetails.innerHTML = "";
+        memberData.forEach(function (member, index) {
+
+            const detailsFrame = document.createElement("div");
+            detailsFrame.classList.add("details-frame");
+
+            const nameInput = document.createElement("div");
+            nameInput.classList.add("name-input");
+            nameInput.textContent = member.username;
+            detailsFrame.appendChild(nameInput);
+
+            const emailInput = document.createElement("div");
+            emailInput.classList.add("email-input");
+            emailInput.textContent = member.email;
+            detailsFrame.appendChild(emailInput);
+
+            const editInput = document.createElement("div");
+            editInput.classList.add("edit-input");
+
+            const editButton = document.createElement("a");
+            editButton.href = "../Team_management/editmember.html";
+            editButton.id = "edit-button";
+            editButton.classList.add("edit-button");
+            editButton.textContent = "Edit";
+
+            editInput.appendChild(editButton);
+            detailsFrame.appendChild(editInput);
+            memberDetails.appendChild(detailsFrame);
+            console.log(detailsFrame);
+
+            editButton.addEventListener("click",function (){
+                window.location.href = `editmember.html?memberID=${nameInput.textContent}`
+            })
+
+        });
+
+    return memberData;
+    }
+
+})
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
